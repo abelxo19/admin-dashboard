@@ -258,7 +258,7 @@ function generateRandomActivity(): Activity {
     time: "Just now",
     type,
     amount,
-    status: status as any,
+    status: status as Activity["status"],
   }
 }
 

@@ -122,9 +122,13 @@ export default function Dashboard() {
     return () => clearInterval(interval)
   }, [toast])
 
-  const handleTabChange = (tab) => {
-    setActiveTab(tab)
+  interface TabChangeHandler {
+    (tab: string): void;
   }
+
+  const handleTabChange: TabChangeHandler = (tab) => {
+    setActiveTab(tab);
+  };
 
   const markAllNotificationsAsRead = () => {
     setNotifications((prev) => prev.map((notification) => ({ ...notification, read: true })))
@@ -522,7 +526,6 @@ export default function Dashboard() {
                                     toast({
                                       title: "Order Cancelled",
                                       description: `Order ${order.id} has been cancelled`,
-                                      variant: "destructive",
                                     })
                                   }
                                 >
@@ -586,7 +589,7 @@ export default function Dashboard() {
 
 // Sample data for charts
 function RevenueChart({ timeframe = "yearly" }) {
-  let data = []
+  let data: { name: string; revenue: number }[] = []
 
   if (timeframe === "yearly") {
     data = [
@@ -636,23 +639,23 @@ function RevenueChart({ timeframe = "yearly" }) {
       y="revenue"
       className="h-full w-full"
       tooltip={
-        <ChartTooltip>
-          <ChartTooltipContent className="p-2">
-            {({ payload }) => (
+        <ChartTooltip
+          content={({ payload }) => (
+            <ChartTooltipContent className="p-2">
               <div className="flex flex-col gap-1">
                 <p className="text-sm font-medium">{payload?.[0]?.payload.name}</p>
                 <p className="text-sm font-medium">${payload?.[0]?.payload.revenue.toLocaleString()}</p>
               </div>
-            )}
-          </ChartTooltipContent>
-        </ChartTooltip>
+            </ChartTooltipContent>
+          )}
+        />
       }
     />
   )
 }
 
 function ProfitMarginChart({ timeframe = "yearly" }) {
-  let data = []
+  let data: { name: string; profit: number; margin: number }[] = []
 
   if (timeframe === "yearly") {
     data = [
@@ -702,16 +705,22 @@ function ProfitMarginChart({ timeframe = "yearly" }) {
       y="profit"
       className="h-full w-full"
       tooltip={
-        <ChartTooltip>
+        <ChartTooltip content={({ payload }) => (
           <ChartTooltipContent className="p-2">
-            {({ payload }) => (
+            {payload && payload.length > 0 && (
               <div className="flex flex-col gap-1">
-                <p className="text-sm font-medium">{payload?.[0]?.payload.name}</p>
-                <p className="text-sm font-medium">Profit: ${payload?.[0]?.payload.profit.toLocaleString()}</p>
-                <p className="text-sm font-medium">Margin: {payload?.[0]?.payload.margin}%</p>
+                <p className="text-sm font-medium">{payload[0].payload.name}</p>
+                <p className="text-sm font-medium">{payload[0].payload.visitors.toLocaleString()} visitors</p>
               </div>
             )}
           </ChartTooltipContent>
+        )}>
+            {({ payload }: { payload: { name: string; visitors: number }[] }) => (
+              <div className="flex flex-col gap-1">
+                <p className="text-sm font-medium">{payload?.[0]?.name}</p>
+                <p className="text-sm font-medium">{payload?.[0]?.payload.visitors.toLocaleString()} visitors</p>
+              </div>
+            )}
         </ChartTooltip>
       }
     />
@@ -735,15 +744,22 @@ function TrafficSourcesChart() {
       y="visitors"
       className="h-full w-full"
       tooltip={
-        <ChartTooltip>
+        <ChartTooltip content={({ payload }) => (
           <ChartTooltipContent className="p-2">
-            {({ payload }) => (
+            {payload && payload.length > 0 && (
               <div className="flex flex-col gap-1">
+                <p className="text-sm font-medium">{payload[0].payload.name}</p>
+                <p className="text-sm font-medium">{payload[0].payload.visitors.toLocaleString()} visitors</p>
+              </div>
+            )}
+          </ChartTooltipContent>
+        )}>
+            {({ payload }) => (
+              <div className="flex flex-col gap-2">
                 <p className="text-sm font-medium">{payload?.[0]?.payload.name}</p>
                 <p className="text-sm font-medium">{payload?.[0]?.payload.visitors.toLocaleString()} visitors</p>
               </div>
             )}
-          </ChartTooltipContent>
         </ChartTooltip>
       }
     />
